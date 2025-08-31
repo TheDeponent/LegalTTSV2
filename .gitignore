@@ -1,6 +1,9 @@
 # Ignore environment file
 .env
 
+# Ignore Python virtual environment
+.venv/
+
 # Ignore all files in Inputs, logs, and outputs folders, but keep the folders
 Inputs/*
 !Inputs/.gitkeep
