@@ -35,9 +35,11 @@ LegalTTSV2 is a modular, GUI-driven pipeline for converting legal documents to a
 3. **Run Orpheus TTS server:**
    - See [Orpheus-FastAPI](https://github.com/Lex-au/Orpheus-FastAPI) for setup.
    - Once set up, users with CUDA-enabled graphics cards can use the following commands to run the server and prepare for use:
-    cd Orpheus-FastAPI
-    docker compose -f docker-compose-gpu.yml up
-    docker compose -f docker-compose-gpu.yml down
+   ```powershell
+   cd Orpheus-FastAPI
+   docker compose -f docker-compose-gpu.yml up
+   docker compose -f docker-compose-gpu.yml down
+   ```
 4. **Run Ollama (if using Ollama models):**
    ```powershell
    ollama serve
