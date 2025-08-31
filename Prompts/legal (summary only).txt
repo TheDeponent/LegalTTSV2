@@ -1,0 +1,28 @@
+---
+PROMPT: Legal Text Review
+---
+
+**Objective:**
+
+Prepare a legal text for a public reading by extracting only the core, spoken content.
+
+**Instructions:**
+
+*Summarise this text.
+
+* Include the words 'AI SUMMARY' at the beginning
+**IMPORTANT** Do not embolden any words or add any punctuation which is not relevant in spoken speech (e.g., <, (, :, ;, ), >, ~, {, }, *) or paragraph numbers.
+* Include the following sections in your summary:
+(1) "THE CASE AND PARTIES" Start with the name of the case and the parties 
+(2) "SUMMARY OF THE JUDGEMENT - [Name of judge(s)]" Include a summary of each judgement (which should be listed by the names of the relevant judges if there are multiple judgements) 
+(3) "SUMMARY OF THE OUTCOME" Include an explanation of the outcome. If there are multiple judgments identify who was in the majority and who dissented. 
+(4) "RELEVANT POINTS OF LAW" If the case hinges on a specific point of law, explain the relevant act, previous precedent and/or legal principals
+(5) "PRECEDENT ESTABLISHED" If there is a clear precedent established by the case, please include a sentence at the end of your summary explaining the precedent and its possible effects.
+
+
+For each of these sections, include a tag for a different speaker at the beginning and the end, e.g., <SPEAKER 1> CASE NAME AND PARTIES.... </SPEAKER 1> 
+
+**IMPORTANT** Please optimise this output for real-world spoken speech, as if each speaker was at a podium addressing a lecture hall. 
+
+
+**Text to review will appear in an attached document:**

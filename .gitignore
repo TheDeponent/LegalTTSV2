@@ -1,0 +1,16 @@
+# Ignore environment file
+.env
+
+# Ignore all files in Inputs, logs, and outputs folders, but keep the folders
+Inputs/*
+!Inputs/.gitkeep
+logs/*
+!logs/.gitkeep
+outputs/*
+!outputs/.gitkeep
+
+# Ignore ZZZ_Archive folder and all its contents
+ZZZ_Archive/
+Prompts/Code Cleanup prompts.txt
+Prompts/emotive.txt
+Prompts/testing.txt

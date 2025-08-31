@@ -1,0 +1,20 @@
+# Core dependencies
+python-dotenv
+requests
+pydub
+python-docx
+docx2pdf
+faster-whisper
+ollama
+pypandoc
+win32com
+shutil
+uuid
+# For Gemini API
+google-generativeai
+# For GUI
+Tkinter
+# For PDF handling
+PyPDF2
+# For typing (if needed)
+typing-extensions
