@@ -34,7 +34,7 @@ LegalTTSV2 is a modular, GUI-driven pipeline for converting legal documents to a
    - Set `GOOGLE_API_KEY` for Gemini API use.
 3. **Run Orpheus TTS server:**
    - See [Orpheus-FastAPI](https://github.com/Lex-au/Orpheus-FastAPI) for setup.
-   - Once set up, users with CUDA-enabled graphics cards can use the following commands to run the server and prepare for use:
+   - Once set up, users with CUDA-enabled graphics cards can use the following commands to run the server via docker and prepare for use:
    ```powershell
    cd Orpheus-FastAPI
    docker compose -f docker-compose-gpu.yml up
