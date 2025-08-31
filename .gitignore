@@ -2,6 +2,7 @@
 .env
 
 # Ignore Python virtual environment
+venv/
 .venv/
 
 # Ignore all files in Inputs, logs, and outputs folders, but keep the folders
