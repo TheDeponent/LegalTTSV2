@@ -1,31 +1,50 @@
-# ============================================================================
-# prompt_handler.py - Prompt File Loader for LegalTTSV2
-#
-# This module provides the load_prompt function, which loads and returns the
-# contents of a system prompt file for use with LLMs. It is used by the main
-# workflow and other modules to retrieve prompt text for AI processing.
-# ============================================================================
 
+# prompt_handler.py - Prompt Loader for LegalTTSV2 (Gradio Edition)
+#
+# Provides functions to load prompt text for LLMs, supporting both file-based and custom (string) prompts.
+# Used by the Gradio pipeline to retrieve the system prompt for AI processing.
 import os
 
-def load_prompt(prompt_file):
-    # Loads and returns the contents of a prompt file for use as a system prompt for LLMs.
-    # Returns an empty string if the file does not exist or an error occurs.
-    if not prompt_file or not os.path.isfile(prompt_file):
-        return ""
-    try:
-        with open(prompt_file, "r", encoding="utf-8") as pf:
-            return pf.read()
-    except Exception as e:
-        print(f"Error reading prompt file '{prompt_file}': {e}")
-        return ""
+# Returns (system_prompt, status_message)
+def get_system_prompt(system_prompt_key, prompt_options, custom_prompt_path):
+    """
+    Resolves and loads the system prompt for LLMs.
+    - If system_prompt_key == '__custom__', uses custom_prompt_path as a file if it exists, else as a string.
+    - Otherwise, loads the prompt from the resolved file in prompt_options.
+    Returns (system_prompt, status_message)
+    """
+    import logging
+    logger = logging.getLogger("PromptHandler")
+    def log(msg):
+        logger.info(msg)
 
-def resolve_prompt_file(selected_prompt, prompt_options, custom_prompt_path):
-    """
-    Returns the correct prompt file path based on GUI selection.
-    If selected_prompt == '__custom__', returns custom_prompt_path.
-    Otherwise, returns prompt_options[selected_prompt].
-    """
-    if selected_prompt == "__custom__":
-        return custom_prompt_path
-    return prompt_options.get(selected_prompt, "")
+    # Determine the prompt file path if not custom
+    if system_prompt_key == "__custom__":
+        if custom_prompt_path and os.path.isfile(custom_prompt_path):
+            try:
+                with open(custom_prompt_path, "r", encoding="utf-8") as pf:
+                    system_prompt = pf.read()
+                status = "Using custom prompt file."
+                log(status)
+            except Exception as e:
+                log(f"Error reading custom prompt file '{custom_prompt_path}': {e}")
+                return "", f"Failed to load custom prompt file: {custom_prompt_path}"
+        else:
+            system_prompt = custom_prompt_path or ""
+            status = "Using custom prompt string."
+            log(status)
+        return system_prompt, status
+    else:
+        prompt_file = prompt_options.get(system_prompt_key, "")
+        if not prompt_file or not os.path.isfile(prompt_file):
+            log(f"Prompt file not found: {prompt_file}")
+            return "", f"Failed to load system prompt: {prompt_file}"
+        try:
+            with open(prompt_file, "r", encoding="utf-8") as pf:
+                system_prompt = pf.read()
+            status = f"Loaded prompt: {prompt_file}"
+            log(status)
+            return system_prompt, status
+        except Exception as e:
+            log(f"Error reading prompt file '{prompt_file}': {e}")
+            return "", f"Failed to load system prompt: {prompt_file}"

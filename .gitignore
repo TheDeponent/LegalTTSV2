@@ -1,3 +1,21 @@
+# Gradio certs/config
+.gradio/
+*.pem
+*.crt
+*.key
+
+# Outputs and logs
+Text Outputs/
+__pycache__/
+*.pyc
+*.tmp
+*.temp
+ZZZ_Archive/
+
+# Environment and editor
+.env
+.vscode/
+
 # Ignore environment file
 .env
 
