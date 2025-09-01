@@ -4,16 +4,14 @@ requests
 pydub
 python-docx
 docx2pdf
+pdf2docx
 faster-whisper
 ollama
 pypandoc
-win32com
-shutil
+pywin32
 uuid
 # For Gemini API
 google-generativeai
-# For GUI
-Tkinter
 # For PDF handling
 PyPDF2
 # For typing (if needed)

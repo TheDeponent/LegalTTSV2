@@ -11,24 +11,34 @@
 import os
 import re
 from typing import Optional
-from docx import Document
+from pdf2docx import Document
 import win32com.client
 import shutil
 
 def pdf_to_docx(pdf_path: str, docx_path: str) -> None:
     # Converts a PDF file to a Word (.docx) file using Microsoft Word automation (win32com.client).
-    # Used by process_pdf to prepare documents for further processing.
-    word = win32com.client.Dispatch("Word.Application")
-    word.Visible = False
-    # Normalize paths for Word
-    pdf_path = os.path.normpath(os.path.abspath(pdf_path))
-    docx_path = os.path.normpath(os.path.abspath(docx_path))
+    # If Word is not available, falls back to pdf2docx library.
     try:
-        doc = word.Documents.Open(pdf_path)
-        doc.SaveAs(docx_path, FileFormat=16)  # 16 = wdFormatDocumentDefault (docx)
-        doc.Close()
-    finally:
-        word.Quit()
+        word = win32com.client.Dispatch("Word.Application")
+        word.Visible = False
+        # Normalize paths for Word
+        pdf_path = os.path.normpath(os.path.abspath(pdf_path))
+        docx_path = os.path.normpath(os.path.abspath(docx_path))
+        try:
+            doc = word.Documents.Open(pdf_path)
+            doc.SaveAs(docx_path, FileFormat=16)  # 16 = wdFormatDocumentDefault (docx)
+            doc.Close()
+        finally:
+            word.Quit()
+    except Exception as e:
+        print(f"Word automation failed: {e}\nFalling back to pdf2docx for conversion.")
+        try:
+            from pdf2docx import Converter
+        except ImportError:
+            raise RuntimeError("Neither Microsoft Word nor pdf2docx is available for PDF to DOCX conversion. Please install pdf2docx or ensure Word is installed.")
+        cv = Converter(pdf_path)
+        cv.convert(docx_path, start=0, end=None)
+        cv.close()
 
 def preprocess_docx(docx_path: str) -> None:
     # Preprocesses the docx file in-place: removes images, paragraph numbering/lettering, [numbers],

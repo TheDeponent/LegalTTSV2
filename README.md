@@ -28,6 +28,7 @@ LegalTTSV2 is a modular, GUI-driven pipeline for converting legal documents to a
    ```powershell
    pip install -r requirements.txt
    ```
+   - FFMPEG is also required (https://ffmpeg.org/download.html) and must be added to your PATH.
 2. **Configure environment:**
    - Create a .env file with New-Item -Path .env.env -ItemType File
    - Set `TTS_ENDPOINT` in `.env` (e.g., `http://localhost:5005/v1/audio/speech`).
@@ -38,7 +39,6 @@ LegalTTSV2 is a modular, GUI-driven pipeline for converting legal documents to a
    ```powershell
    cd Orpheus-FastAPI
    docker compose -f docker-compose-gpu.yml up
-   docker compose -f docker-compose-gpu.yml down
    ```
 4. **Run Ollama (if using Ollama models):**
    ```powershell
@@ -59,6 +59,7 @@ LegalTTSV2 is a modular, GUI-driven pipeline for converting legal documents to a
 - **Audio deduplication:** Always run after audio concatenation (`audio_deduplication.py`).
 - **Document conversion:** Uses `win32com` for DOCX/PDF (Windows only), `pypandoc` for RTF to DOCX.
 - **Testing:** No formal test suite; test via GUI and sample documents.
+- **Docx Conversion:** For conversion of PDF -> Docx, the scripts will attempt to convert via word for optimal conversion, but will fall back to a python-based conversion via pdf2docx if Word is unavailable.
 
 ## Project Conventions
 - **Separation of concerns:** Business logic in `Core/`, GUI in `Gui/` and `Core/gui_utils.py`.
