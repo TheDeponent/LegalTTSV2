@@ -20,19 +20,10 @@ def get_system_prompt(system_prompt_key, prompt_options, custom_prompt_path):
 
     # Determine the prompt file path if not custom
     if system_prompt_key == "__custom__":
-        if custom_prompt_path and os.path.isfile(custom_prompt_path):
-            try:
-                with open(custom_prompt_path, "r", encoding="utf-8") as pf:
-                    system_prompt = pf.read()
-                status = "Using custom prompt file."
-                log(status)
-            except Exception as e:
-                log(f"Error reading custom prompt file '{custom_prompt_path}': {e}")
-                return "", f"Failed to load custom prompt file: {custom_prompt_path}"
-        else:
-            system_prompt = custom_prompt_path or ""
-            status = "Using custom prompt string."
-            log(status)
+        # Always treat custom_prompt_path as the prompt text, not a file path
+        system_prompt = custom_prompt_path or ""
+        status = "Using custom prompt text from UI."
+        log(status)
         return system_prompt, status
     else:
         prompt_file = prompt_options.get(system_prompt_key, "")

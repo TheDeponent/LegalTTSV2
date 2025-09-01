@@ -88,7 +88,7 @@ with gr.Blocks() as demo:
             llm_model = gr.Dropdown([label for (label, value) in model_options], label="LLM Model", value=model_options[0][0])
             custom_llm_model_name = gr.Textbox(label="Custom LLM Model Name (Ollama)", lines=1, visible=False)
             prompt = gr.Dropdown(PROMPT_LABELS, label="Prompt", value=PROMPT_LABELS[0])
-            custom_prompt_text = gr.Textbox(label="Custom Prompt (if selected above)", lines=4, visible=False)
+            custom_prompt_text = gr.Textbox(label="Custom Prompt Text (enter your prompt here)", lines=4, visible=False)
             voice = gr.Dropdown([name for (name, desc) in voice_options], label="Voice", value=voice_options[0][0])
             skip_tts = gr.Checkbox(label="Skip TTS (LLM only, no audio)", value=False)
             process_btn = gr.Button("Process and Export Audio")
