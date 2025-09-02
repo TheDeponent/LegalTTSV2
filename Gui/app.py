@@ -82,6 +82,10 @@ def process_document_backend(
         docx_path = convert_to_docx(input_file_path)
         if docx_path != input_file_path:
             yield f"Converted to: {docx_path}"
+    except ValueError as ve:
+        # Custom error for unsupported file types
+        yield (f"Invalid file type. Only PDF, DOCX, RTF, and TXT files are allowed.\nDetails: {ve}")
+        return
     except Exception as e:
         yield f"File conversion failed: {e}"
         return

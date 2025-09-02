@@ -79,7 +79,7 @@ def convert_rtf_to_docx(rtf_path):
 
 def convert_to_docx(input_path):
     # Convert an input file (RTF, PDF, or DOCX) to DOCX if needed.
-    ext = os.path.splitext(input_path)[1].lower()
+    ext = os.path.splitext(input_path)[1].strip().lower()
     if ext == ".docx":
         log(f"Input is already DOCX: {input_path}")
         return input_path
@@ -87,9 +87,20 @@ def convert_to_docx(input_path):
         return convert_rtf_to_docx(input_path)
     elif ext == ".pdf":
         return process_pdf(input_path)
+    elif ext == ".txt":
+        # Convert .txt to .docx by reading text and writing to a new docx file
+        from docx import Document
+        doc = Document()
+        with open(input_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                doc.add_paragraph(line.rstrip())
+        docx_path = os.path.splitext(input_path)[0] + ".docx"
+        doc.save(docx_path)
+        log(f"Converted TXT to DOCX: {docx_path}")
+        return docx_path
     else:
-        log(f"Unsupported file type for conversion: {input_path}")
-        raise ValueError(f"Unsupported file type for conversion: {input_path}")
+        log(f"Unsupported file type for conversion: {input_path} (extension: '{ext}')")
+        raise ValueError(f"Unsupported file type for conversion: {input_path} (extension: '{ext}')")
 
 
 # PDF to DOCX and preprocessing utilities

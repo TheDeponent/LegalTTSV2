@@ -26,8 +26,13 @@ def assign_voices_to_chunks(text, user_voice, all_voices, max_length=750):
                 chunks.append(parts[i])
             i += 1
     tag_voice_map = {}
-    other_voices = [v for v in all_voices if v != user_voice]
-    voice_idx = 0
+    # Gender mapping for voices
+    female_voices = [v for v in all_voices if v in {"Tara", "Leah", "Jess", "Mia", "Zoe"} and v != user_voice]
+    male_voices = [v for v in all_voices if v in {"Leo", "Dan", "Zac"} and v != user_voice]
+    # Alternate between female and male voices
+    female_idx = 0
+    male_idx = 0
+    next_is_female = True
     assigned = []
     voice_tag_pattern = re.compile(r'voice:([a-zA-Z0-9_\-]+)', re.IGNORECASE)
     for chunk in chunks:
@@ -41,17 +46,26 @@ def assign_voices_to_chunks(text, user_voice, all_voices, max_length=750):
                 log(f"Explicit voice tag found: {explicit_voice}")
             else:
                 voice = user_voice
-            # Remove the voice:NAME tag from the chunk text
             chunk_text = voice_tag_pattern.sub('', chunk)
         elif tag_match:
             tag = tag_match.group(0).upper()
             if tag in tag_voice_map:
                 voice = tag_voice_map[tag]
             else:
-                if other_voices:
-                    voice = other_voices[voice_idx % len(other_voices)]
+                # Alternate between female and male voices
+                if female_voices or male_voices:
+                    if next_is_female and female_voices:
+                        voice = female_voices[female_idx % len(female_voices)]
+                        female_idx += 1
+                        next_is_female = False
+                    elif male_voices:
+                        voice = male_voices[male_idx % len(male_voices)]
+                        male_idx += 1
+                        next_is_female = True
+                    else:
+                        # Fallback if one gender list is empty
+                        voice = (female_voices + male_voices)[0]
                     log(f"Assigned voice '{voice}' to tag {tag}")
-                    voice_idx += 1
                 else:
                     voice = user_voice
                 tag_voice_map[tag] = voice

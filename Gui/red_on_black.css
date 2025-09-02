@@ -1,0 +1,16 @@
+/* Minimal red-on-black overrides for Gradio UI */
+body, .gradio-container {
+  background: #18181b !important; /* slate-900 */
+  color: #fff !important;
+}
+.gr-button-primary, .gr-button-primary:active, .gr-button-primary:focus {
+  background: #ef4444 !important; /* red-500 */
+  color: #fff !important;
+  border-color: #ef4444 !important;
+}
+.gr-button-primary:hover {
+  background: #f87171 !important; /* red-400 */
+}
+.gr-label, label {
+  color: #ef4444 !important; /* red-500 for labels */
+}
