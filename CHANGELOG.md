@@ -1,9 +1,9 @@
-# Changelog
 
+# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-# We all LOVE Github
+
 ## [Unreleased/Ideas]
 - Refine hardcoded AI prompts to ensure speakers don't switch so often.
 - Refine audio de-duplication to check 'repeat zones' for audio issues and more aggressively pare back
@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Leverage jade/fedleg/vicleg APIs to generate audio summaries of new rulings as audio 'legal news' segments
 - Utilise/improve regex doc handling to ensure quality outcomes from low-end local MLMs.
 
+# [1.2.3]
+### Added
+- Added user constant "Time" to USER_CONSTANTS in `Core/constants.py`, which provides the current system time.
+- Added user constant "Greeting" to USER_CONSTANTS in `Core/constants.py`, which dynamically generates "Good morning/afternoon/evening {Username}" based on the user's local time and Git username.
 
 ## [1.2.2] - 2025-09-03
 ### Added

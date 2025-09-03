@@ -4,7 +4,7 @@ OBJECTIVE: Convert the provided legal text into a clean, spoken-word script. The
 
 INSTRUCTIONS:
 
-Start the entire response with the phrase "AI SUMMARY".
+Start the entire response with the phrase "{Greeting}".
 
 Extract and summarize the key sections from the provided text.
 
