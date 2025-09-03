@@ -36,3 +36,8 @@ ZZZ_Archive/
 Prompts/Code Cleanup prompts.txt
 Prompts/emotive.txt
 Prompts/testing.txt
+
+
+# Python bytecode
+__pycache__/
+*.pyc
