@@ -48,22 +48,19 @@ MODEL_OPTIONS = [
 ]
 
 
-
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROMPT_FILE_PATHS = {
-    "Legal (Summary Only)": os.path.join(project_root, "prompts", "legal (summary only).txt"),
-    "Legal (Full Text)": os.path.join(project_root, "prompts", "legal (full text).txt"),
-    "Emotive": os.path.join(project_root, "prompts", "emotive.txt")
-}
-
-# Load prompt file contents at startup
+prompts_dir = os.path.join(project_root, "Prompts")
 PROMPT_OPTIONS = {}
-for name, path in PROMPT_FILE_PATHS.items():
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            PROMPT_OPTIONS[name] = f.read()
-    except Exception as e:
-        PROMPT_OPTIONS[name] = f"[Error loading prompt: {e}]"
+if os.path.isdir(prompts_dir):
+    for fname in os.listdir(prompts_dir):
+        if fname.lower().endswith(".txt"):
+            prompt_name = os.path.splitext(fname)[0]
+            prompt_path = os.path.join(prompts_dir, fname)
+            try:
+                with open(prompt_path, "r", encoding="utf-8") as f:
+                    PROMPT_OPTIONS[prompt_name] = f.read()
+            except Exception as e:
+                PROMPT_OPTIONS[prompt_name] = f"[Error loading prompt: {e}]"
 
 def process_document_backend(
     input_file_path,
@@ -173,7 +170,7 @@ def process_document_backend(
     tag_pattern = re.compile(r'<(/?AI SUMMARY|/?SPEAKER ?\d+)>', re.IGNORECASE)
     max_length = MAX_CHUNK_LENGTH
     flat_chunks = []
-    for chunk, assigned_voice in chunks_and_voices:
+    for idx, (chunk, assigned_voice) in enumerate(chunks_and_voices):
         clean_chunk = tag_pattern.sub('', chunk).strip()
         # Split only if needed, otherwise just use the chunk
         if len(clean_chunk) > max_length:
@@ -182,6 +179,8 @@ def process_document_backend(
                 flat_chunks.append((sub_chunk, assigned_voice))
         else:
             flat_chunks.append((clean_chunk, assigned_voice))
+        # Log chunk number and character count
+        yield f"Chunk {idx+1}: {len(clean_chunk)} characters | Voice: {assigned_voice}"
 
     # TTS processing (moved outside the chunk loop)
     audio_segments = []

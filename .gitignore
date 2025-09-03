@@ -33,6 +33,7 @@ outputs/*
 
 # Ignore ZZZ_Archive folder and all its contents
 ZZZ_Archive/
-Prompts/Code Cleanup prompts.txt
-Prompts/emotive.txt
-Prompts/testing.txt
+
+# Keep these prompt templates in the repo
+!Prompts/legal (summary only).txt
+!Prompts/legal (full text).txt

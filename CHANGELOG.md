@@ -22,6 +22,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Utilise/improve regex doc handling to ensure quality outcomes from low-end local MLMs.
 
 
+## [1.2.1] - 2025-09-03
+### Added
+- Dynamic prompt template dropdown: now lists all .txt files in the Prompts directory automatically.
+- Improved .gitignore handling: only keeps core prompt templates in version control, ignores others.
+### Changed
+- Chunk-by-chunk log output now shows chunk number and character count instead of a text preview.
+
 ## [1.2.0] - 2025-09-03
 ### Added
 - Support for custom prompts: users can now enter any prompt directly in the prompt textbox.

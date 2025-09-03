@@ -1,0 +1,13 @@
+Please fully comment this document based on development best practice.
+
+-Remove intermediate comments about updates to the code
+-Comment a full summary of the operation of the script at the top above any imported libraries
+-Comment when other modules are called to perform an operation
+-Comment types should be consistent, e.g. use # commenting for every line of comments.
+-Calls to other modules should be commented in human readable text. e.g., instead of '# Calls Core.gemini_handler.process_gemini_chunked_workflow', write 'Gemini_handler' is used to...'
+
+
+Great. Now I'd also like you to clean up import functions by:
+
+-Removing duplicated imports
+-Placing imports used in multiple functions at the top of the document.
