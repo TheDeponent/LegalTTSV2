@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Utilise/improve regex doc handling to ensure quality outcomes from low-end local MLMs.
 
 
+## [1.2.2] - 2025-09-03
+### Added
+- Support for user constants in prompt templates: you can now use tags like `{Username}` in any prompt, which will be replaced with values from the `USER_CONSTANTS` dictionary in `Core/constants.py`.
+
 ## [1.2.1] - 2025-09-03
 ### Added
 - Dynamic prompt template dropdown: now lists all .txt files in the Prompts directory automatically.
