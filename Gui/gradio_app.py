@@ -38,15 +38,7 @@ def gradio_process_document(input_file, model_name, prompt_key, voice_name, cust
         else:
             model_value = next((v for (label, v) in model_options if label == model_name or v == model_name), model_name)
         voice_value = next((name for (name, desc) in voice_options if name == voice_name), voice_name)
-        if prompt_key == "Custom":
-            prompt_key_value = "__custom__"
-            custom_prompt_path = custom_prompt_text.strip()
-            if not custom_prompt_path:
-                yield None, "Please enter a custom prompt.", make_progress_html("LLM", 0), make_progress_html("Audio", 0)
-                return
-        else:
-            prompt_key_value = prompt_key
-            custom_prompt_path = None
+        prompt_text = custom_prompt_text.strip() if custom_prompt_text else ""
         llm_progress_val = 0
         tts_progress_val = 0
         def llm_progress_cb(val):
@@ -60,11 +52,11 @@ def gradio_process_document(input_file, model_name, prompt_key, voice_name, cust
         for result in process_document_backend(
             input_file_path,
             model_value,
-            prompt_key_value,
+            "__custom__",
             voice_value,
             prompt_options,
             voice_options,
-            custom_prompt_path=custom_prompt_path,
+            prompt_text=prompt_text,
             skip_tts=skip_tts,
             progress=None,
             llm_progress_cb=llm_progress_cb,
@@ -130,12 +122,12 @@ class RedOnBlack(Base):
             block_border_width="3px",
             block_shadow="*shadow_drop_lg",
             button_primary_shadow="*shadow_drop_lg",
-            button_large_padding="32px",
+            button_large_padding="40px",
         )
 
 red_black_theme = RedOnBlack()
 
-with gr.Blocks(theme=red_black_theme) as demo:
+with gr.Blocks(theme=red_black_theme, css=None) as demo:
     gr.Markdown("# LegalTTSV2")
     with gr.Row():
         with gr.Column():
@@ -144,38 +136,50 @@ with gr.Blocks(theme=red_black_theme) as demo:
             custom_input_text = gr.Textbox(label="Custom LLM Input Text", lines=8, visible=False)
             llm_model = gr.Dropdown([label for (label, value) in model_options], label="LLM Model", value=model_options[0][0])
             custom_llm_model_name = gr.Textbox(label="Custom LLM Model Name (Ollama)", lines=1, visible=False)
-            prompt = gr.Dropdown(PROMPT_LABELS, label="Prompt", value=PROMPT_LABELS[0])
-            custom_prompt_text = gr.Textbox(label="Custom Prompt Text (enter your prompt here)", lines=4, visible=False)
+            prompt = gr.Dropdown(PROMPT_LABELS, label="Prompt Template", value="Custom")
+            prompt_text = gr.Textbox(label="Prompt", lines=4, value="")
             voice = gr.Dropdown([name for (name, desc) in voice_options], label="Voice", value=voice_options[0][0])
             skip_tts = gr.Checkbox(label="Skip TTS (LLM only, no audio)", value=False)
             process_btn = gr.Button("Process and Export Audio", variant="primary")
         with gr.Column():
-            llm_progress = gr.HTML(make_progress_html("LLM", 0), label="LLM Progress")
-            tts_progress = gr.HTML(make_progress_html("Audio", 0), label="Audio Progress")
+            llm_progress = gr.HTML(make_progress_html("LLM", 0))
+            tts_progress = gr.HTML(make_progress_html("Audio", 0))
             audio_output = gr.Audio(label="Audio Output", interactive=False)
-            logs_output = gr.Textbox(label="Logs / Status", lines=50, autoscroll=True)
+            logs_output = gr.Textbox(
+                label="Logs / Status",
+                lines=20,
+                max_lines=20,
+                autoscroll=True,
+                elem_id="logs-status-box",
+                container=True
+            )
 
 
 
-    def show_custom_prompt(selected_prompt):
-        return gr.update(visible=(selected_prompt == "Custom"))
+    def update_prompt_text(selected_prompt):
+        if selected_prompt == "Custom":
+            return gr.update(value="")
+        return gr.update(value=prompt_options[selected_prompt])
+
     def show_custom_llm(selected_llm):
         return gr.update(visible=(selected_llm == "Custom"))
+        
     def show_llm_input_mode(selected_mode):
         return (
             gr.update(visible=(selected_mode == "Input Files")),
             gr.update(visible=(selected_mode == "Custom"))
         )
 
-    prompt.change(show_custom_prompt, inputs=prompt, outputs=custom_prompt_text)
+    prompt.change(update_prompt_text, inputs=prompt, outputs=prompt_text)
     llm_model.change(show_custom_llm, inputs=llm_model, outputs=custom_llm_model_name)
     llm_input_mode.change(show_llm_input_mode, inputs=llm_input_mode, outputs=[input_file, custom_input_text])
 
 
-    def gradio_process_document_llm_input(llm_input_mode_val, input_file, custom_input_text, *args):
-        # If using file, pass file, else pass text as a pseudo-file object with .name=None and .read() method
+
+    def gradio_process_document_llm_input(llm_input_mode_val, input_file, custom_input_text, llm_model_val, voice_val, prompt_text_val, skip_tts_val, llm_progress_val, tts_progress_val, custom_llm_model_name_val):
+        # Always use prompt_text_val as the prompt, and pass '__custom__' as the prompt key
         if llm_input_mode_val == "Input Files":
-            gen = gradio_process_document(input_file, *args)
+            gen = gradio_process_document(input_file, llm_model_val, "__custom__", voice_val, prompt_text_val, skip_tts_val, llm_progress_val, tts_progress_val, custom_llm_model_name_val)
         else:
             class TextInputObj:
                 def __init__(self, text):
@@ -183,14 +187,17 @@ with gr.Blocks(theme=red_black_theme) as demo:
                     self.text = text
                 def read(self):
                     return self.text
-            gen = gradio_process_document(TextInputObj(custom_input_text), *args)
+            gen = gradio_process_document(TextInputObj(custom_input_text), llm_model_val, "__custom__", voice_val, prompt_text_val, skip_tts_val, llm_progress_val, tts_progress_val, custom_llm_model_name_val)
         for result in gen:
             yield result
 
     process_btn.click(
         gradio_process_document_llm_input,
-        inputs=[llm_input_mode, input_file, custom_input_text, llm_model, prompt, voice, custom_prompt_text, skip_tts, llm_progress, tts_progress, custom_llm_model_name],
+        inputs=[llm_input_mode, input_file, custom_input_text, llm_model, voice, prompt_text, skip_tts, llm_progress, tts_progress, custom_llm_model_name],
         outputs=[audio_output, logs_output, llm_progress, tts_progress]
     )
 
     demo.launch(server_name="0.0.0.0")
+
+import gradio as gr
+

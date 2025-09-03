@@ -57,12 +57,13 @@ LegalTTSV2 is a modular, Gradio web-based pipeline for converting legal document
    - Process and export audio.
 
 ## Developer Notes
-- **Add a new LLM:** Implement a handler in `Core/llm_handler.py` and update web UI model options.
-- **Add a new prompt:** Place a `.txt` file in `Prompts/` and select the prompt when running the app.
-- **Audio deduplication:** Always run after audio concatenation (`audio_deduplication.py`).
+- **Add a new LLM for easy selection:** Implement a handler in `Core/llm_handler.py` and update web UI model options.
+- **Add a new prompt easy selection:** Place a `.txt` file in `Prompts/` and select the prompt when running the app.
+- **Audio deduplication:** Always runs after audio concatenation (`audio_deduplication.py`) to reduce repitition errors made during TTS conversion.
 - **Document conversion:** Uses `win32com` for DOCX/PDF (Windows only), `pypandoc` for RTF to DOCX.
-- **Testing:** No formal test suite; test via web UI and sample documents.
-- **Docx Conversion:** For conversion of PDF -> Docx, the scripts will attempt to convert via Word for optimal conversion, but will fall back to a python-based conversion via pdf2docx if Word is unavailable.
+- **Testing:** No formal test suite; but has been tested on a number of HCA/VSC cases.
+- **Document conversion - compatibility:** For conversion of PDF -> Docx, the scripts will attempt to convert via Word for optimal conversion, but will fall back to a python-based conversion via pdf2docx if Word is unavailable.
+- **Python Version:** This app is built on python 3.10 for best compatibility with Orpheus 
 
 ## Project Conventions
 - **Separation of concerns:** Business logic in `Core/`, web UI in `gradio_app.py` and `Gui/app.py`.

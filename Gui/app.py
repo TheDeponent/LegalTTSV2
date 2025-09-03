@@ -48,12 +48,22 @@ MODEL_OPTIONS = [
 ]
 
 
+
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROMPT_OPTIONS = {
+PROMPT_FILE_PATHS = {
     "Legal (Summary Only)": os.path.join(project_root, "prompts", "legal (summary only).txt"),
     "Legal (Full Text)": os.path.join(project_root, "prompts", "legal (full text).txt"),
     "Emotive": os.path.join(project_root, "prompts", "emotive.txt")
 }
+
+# Load prompt file contents at startup
+PROMPT_OPTIONS = {}
+for name, path in PROMPT_FILE_PATHS.items():
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            PROMPT_OPTIONS[name] = f.read()
+    except Exception as e:
+        PROMPT_OPTIONS[name] = f"[Error loading prompt: {e}]"
 
 def process_document_backend(
     input_file_path,
@@ -62,7 +72,7 @@ def process_document_backend(
     voice_name,
     prompt_options,
     voice_options,
-    custom_prompt_path=None,
+    prompt_text=None,
     skip_tts=False,
     progress=None,
     llm_progress_cb=None,
@@ -73,7 +83,7 @@ def process_document_backend(
     # Convert input file to DOCX if needed (handles RTF, PDF, DOCX)
     temp_audio_files = []
     llm_response = None
-    system_prompt, prompt_status = get_system_prompt(system_prompt_key, prompt_options, custom_prompt_path)
+    system_prompt, prompt_status = get_system_prompt(system_prompt_key, prompt_options, prompt_text)
     yield prompt_status
     if not system_prompt:
         return

@@ -1,0 +1,17 @@
+name: Push Notification
+
+on:
+  push:
+    branches:
+      - main # Or any other branch you want to monitor
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Notification
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_FOR_NOTIFICATIONS }}
+          event-type: new-push
+          client-payload: '{"ref": "${{ github.ref }}", "pusher": "${{ github.actor }}"}'
