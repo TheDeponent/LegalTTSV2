@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Leverage jade/fedleg/vicleg APIs to generate audio summaries of new rulings as audio 'legal news' segments
 - Utilise/improve regex doc handling to ensure quality outcomes from low-end local MLMs.
 
-# [1.2.3]
+## [1.2.3]
 ### Added
 - Added user constant "Time" to USER_CONSTANTS in `Core/constants.py`, which provides the current system time.
 - Added user constant "Greeting" to USER_CONSTANTS in `Core/constants.py`, which dynamically generates "Good morning/afternoon/evening {Username}" based on the user's local time and Git username.

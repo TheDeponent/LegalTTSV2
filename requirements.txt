@@ -1,3 +1,5 @@
+#Added in 1.2.4 for location variables
+tzlocal
 # Core dependencies
 python-dotenv
 requests
