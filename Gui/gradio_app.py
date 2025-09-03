@@ -8,6 +8,7 @@ import gradio.themes as themes
 from gradio.themes.base import Base
 from gradio.themes.utils import colors, fonts, sizes
 
+
 voice_options = VOICE_OPTIONS
 model_options = MODEL_OPTIONS + [("Custom", "__custom__")]
 prompt_options = dict(PROMPT_OPTIONS)
