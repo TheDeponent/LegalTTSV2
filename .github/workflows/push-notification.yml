@@ -3,7 +3,7 @@ name: Push Notification
 on:
   push:
     branches:
-      - main # Or any other branch you want to monitor
+      - main # Or any other branch you want to monitor zz
 
 jobs:
   notify:
