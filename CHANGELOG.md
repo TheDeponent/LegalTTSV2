@@ -1,8 +1,10 @@
-
 # Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Known Issues]
+- The progress bars for Ollama LLMs update inconsistently
 
 ## [Unreleased/Ideas]
 - Refine hardcoded AI prompts to ensure speakers don't switch so often.
@@ -20,6 +22,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Support for legislation and bills
 - Leverage jade/fedleg/vicleg APIs to generate audio summaries of new rulings as audio 'legal news' segments
 - Utilise/improve regex doc handling to ensure quality outcomes from low-end local MLMs.
+
+## [1.3.2] - 2025-09-03
+### Fixed
+- Country user constant now returns the full country name (e.g., "Australia" instead of "AU").
+- Country code mapping moved to `Core/country_codes.py` for maintainability.
+- Gemini API output now appears in the Gradio log instead of the terminal.
+- Fixed all errors and edge cases for custom LLM input (prompt context, audio output, and logging).
+- Ensured Gemini receives the system prompt as a system instruction and user text as the main input for custom LLM input mode.
+- Fixed all edge cases for prompt passing and log output for both Gemini and Ollama custom input scenarios.
+### Improved
+- Gemini and Ollama LLM output now streams to the Gradio log/status box in real time, providing immediate feedback in the UI.
+- Custom LLM input logs are now timestamped to prevent overwriting previous runs.
+- System prompt and user text are now explicitly logged for Gemini custom input, aiding prompt debugging.
+- LLM progress updates are now only shown in the progress bar, not in the log/status box, for a cleaner UI.
+- LLM responses are now displayed as a single, clearly labeled block after processing, improving legibility.
+- Gemini and Ollama prompt handling is robust and always visible in the log for debugging.
+
+
+## [1.3.1] - 2025-09-03
+### Fixed
+- Major bugfix: Custom LLM Input now allows copy-pasted text to be sent directly to Gemini and other LLMs, bypassing all file conversion and document logic.
+- Fixed all related errors for custom input (no file required, prompt is included, audio output works).
+
+### Improved
+- Custom LLM Input now properly includes the selected prompt as context for Gemini and other LLMs.
 
 ## [1.2.3]
 ### Added
@@ -67,7 +94,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 - Refactored doc_utils to include functions from pdf/docx/file conversion handlers.
-
 
 ### Removed
 - Deprecation of tk gui

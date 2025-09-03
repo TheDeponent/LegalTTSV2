@@ -4,7 +4,7 @@ OBJECTIVE: Convert the provided legal text into a clean, spoken-word script. The
 
 INSTRUCTIONS:
 
-Start the entire response with the phrase "{Greeting}".
+Start the entire response with the phrase "{Greeting}". You do not need to include any other greetings.
 
 Extract and summarize the key sections from the provided text.
 

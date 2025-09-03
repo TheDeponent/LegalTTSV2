@@ -18,6 +18,7 @@ try:
 	import tzlocal
 except ImportError:
 	tzlocal = None
+from Core.country_codes import COUNTRY_CODES
 	
 def get_state():
 	try:
@@ -71,7 +72,8 @@ def get_country():
 	try:
 		loc = locale.getdefaultlocale()
 		if loc and len(loc) > 0 and loc[0]:
-			return loc[0].split('_')[-1]
+			code = loc[0].split('_')[-1]
+			return COUNTRY_CODES.get(code, code)
 		else:
 			return "Unknown"
 	except Exception:

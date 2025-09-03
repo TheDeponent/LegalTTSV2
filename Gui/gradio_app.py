@@ -27,8 +27,13 @@ def gradio_process_document(input_file, model_name, prompt_key, voice_name, cust
     try:
         logs_persistent = "Starting..."
         yield None, logs_persistent, make_progress_html("LLM", 0), make_progress_html("Audio", 0)
-        input_file_path = input_file.name if input_file else None
-        if not input_file_path:
+        # Accept both file and custom text input objects
+        if hasattr(input_file, 'read') and hasattr(input_file, 'text'):
+            # Custom text input object (from Custom LLM Input)
+            input_file_path = input_file
+        else:
+            input_file_path = input_file.name if input_file else None
+        if input_file_path is None:
             yield None, "No input file provided.", make_progress_html("LLM", 0), make_progress_html("Audio", 0)
             return
         if model_name == "Custom" or model_name == "__custom__":

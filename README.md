@@ -73,8 +73,7 @@ LegalTTSV2 is a modular, Gradio web-based pipeline for converting legal document
 - Orpheus TTS API by [Lex-au/Orpheus-FastAPI](https://github.com/Lex-au/Orpheus-FastAPI)
 - Orpheus TTS (https://github.com/canopyai/Orpheus-TTS)
 
-## Known Issues
-- The progress bars for LLMs update inconsistently
+
 
 ---
 If you have questions about conventions or workflows, please ask for clarification or examples before making major changes.

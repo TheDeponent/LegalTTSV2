@@ -116,6 +116,15 @@ def process_gemini_file_workflow(docx_path, model_name, system_prompt, voice_nam
 
 def get_gemini_response(text, model_name, system_prompt, api_key):
     # Sends a text prompt to the Gemini API and returns the generated response text.
+    # Accepts an optional log_callback for logging to Gradio UI.
+    def log(msg):
+        if hasattr(get_gemini_response, 'log_callback') and get_gemini_response.log_callback:
+            get_gemini_response.log_callback(msg)
+        elif hasattr(get_gemini_response, '_log_callback') and get_gemini_response._log_callback:
+            get_gemini_response._log_callback(msg)
+        else:
+            pass  # No-op if no callback set
+
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
@@ -125,15 +134,15 @@ def get_gemini_response(text, model_name, system_prompt, api_key):
         data["system_instruction"] = {"role": "system", "parts": [{"text": system_prompt}]}
     try:
         resp = requests.post(url, headers=headers, json=data, timeout=120)
-        print(f"Gemini API raw response: {resp.status_code} {resp.text}")
+        log(f"Gemini API raw response: {resp.status_code} {resp.text}")
         resp.raise_for_status()
         result = resp.json()
         candidates = result.get("candidates")
         if candidates and "content" in candidates[0] and "parts" in candidates[0]["content"]:
             return candidates[0]["content"]["parts"][0].get("text", "")
-        print(f"Gemini API unexpected response structure: {result}")
+        log(f"Gemini API unexpected response structure: {result}")
         return None
     except Exception as e:
-        print(f"Gemini API error: {e}\nFull response: {getattr(e, 'response', None)}")
+        log(f"Gemini API error: {e}\nFull response: {getattr(e, 'response', None)}")
         return None
 
