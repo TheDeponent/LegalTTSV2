@@ -6,36 +6,29 @@
 import os
 
 # Returns (system_prompt, status_message)
-def get_system_prompt(system_prompt_key, prompt_options, custom_prompt_path):
-    """
-    Resolves and loads the system prompt for LLMs.
-    - If system_prompt_key == '__custom__', uses custom_prompt_path as a file if it exists, else as a string.
-    - Otherwise, loads the prompt from the resolved file in prompt_options.
-    Returns (system_prompt, status_message)
-    """
+def get_system_prompt(system_prompt_key, prompt_options, prompt_text):
+    # Processes the system prompt for LLMs.
+    # Uses the prompt_text directly from the UI, which contains either:
+    # a) The user's custom prompt (if system_prompt_key == '__custom__')
+    # b) The possibly modified template prompt (if system_prompt_key is a template name)
+    # Returns (system_prompt, status_message)
     import logging
     logger = logging.getLogger("PromptHandler")
     def log(msg):
         logger.info(msg)
 
-    # Determine the prompt file path if not custom
-    if system_prompt_key == "__custom__":
-        # Always treat custom_prompt_path as the prompt text, not a file path
-        system_prompt = custom_prompt_path or ""
-        status = "Using custom prompt text from UI."
+    # Always use the prompt text from the UI
+    system_prompt = prompt_text.strip() if prompt_text else ""
+    
+    if not system_prompt:
+        status = "No prompt text provided."
         log(status)
-        return system_prompt, status
+        return "", status
+        
+    if system_prompt_key == "__custom__":
+        status = "Using custom prompt from UI."
     else:
-        prompt_file = prompt_options.get(system_prompt_key, "")
-        if not prompt_file or not os.path.isfile(prompt_file):
-            log(f"Prompt file not found: {prompt_file}")
-            return "", f"Failed to load system prompt: {prompt_file}"
-        try:
-            with open(prompt_file, "r", encoding="utf-8") as pf:
-                system_prompt = pf.read()
-            status = f"Loaded prompt: {prompt_file}"
-            log(status)
-            return system_prompt, status
-        except Exception as e:
-            log(f"Error reading prompt file '{prompt_file}': {e}")
-            return "", f"Failed to load system prompt: {prompt_file}"
+        status = f"Using prompt template: {system_prompt_key}"
+    
+    log(status)
+    return system_prompt, status
