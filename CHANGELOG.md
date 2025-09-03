@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased/Ideas]
 - Refine hardcoded AI prompts to ensure speakers don't switch so often.
 - Refine audio de-duplication to check 'repeat zones' for audio issues and more aggressively pare back
-- Dockerize application
+- Dockerize application - Higgs(once more of the list has been completed)
 - Further post-processing with whisper/ffmpeg and/or secondary checking of audio files by LLMs. Identify pieces of audio which  illegible and re-process with Orpheus and insert back into main audio file. Also comparing the original text to the whisper log file to determine where there are segments of missing text, then rerecording these and inserting them back into the audio. - Higgs
 - Better handling of legal terms such as 'precedent' - find ways to ensure these are read properly by the model.
 - Prompt library - support for different types of Australian legal judgments: ensure judge names are read properly, process text and AI inputs based on standard documentation style of major courts, etc. Better utilise emotion tags from Orpheus, maybe have derpy dan summarise the case academically, then break it down with jokes and bad comparisons while laughing and sighing
