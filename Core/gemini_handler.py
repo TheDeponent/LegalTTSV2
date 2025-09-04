@@ -37,22 +37,8 @@ def process_gemini_request(input_path, input_text, model_name, system_prompt, vo
     try:
         # --- 1. Prepare Input (File or Text) ---
         if input_path:
-            ext = os.path.splitext(input_path)[1].lower()
-            if ext == ".docx":
-                yield "Converting DOCX to PDF for Gemini upload..."
-                temp_dir = tempfile.gettempdir()
-                base = os.path.splitext(os.path.basename(input_path))[0]
-                pdf_path = os.path.join(temp_dir, f"{base}_gemini_upload.pdf")
-                pythoncom.CoInitialize()
-                docx2pdf_convert(input_path, pdf_path)
-            elif ext == ".pdf":
-                pdf_path = input_path
-            else:
-                yield f"Unsupported file type for Gemini upload: {ext}. Aborting."
-                return [], None
-            
             yield "Uploading file to Gemini..."
-            uploaded_file = genai.upload_file(path=pdf_path)
+            uploaded_file = genai.upload_file(path=input_path)
             prompt_parts.append(uploaded_file)
 
         elif input_text:

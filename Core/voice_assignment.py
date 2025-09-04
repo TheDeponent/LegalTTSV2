@@ -9,73 +9,94 @@ from Core.llm_handler import log
 def assign_voices_to_chunks(text, user_voice, all_voices, max_length=750):
     # Parse tags, split long paragraphs, and assign voices to chunks for TTS processing.
     # Returns a list of (chunk, assigned_voice) tuples for downstream audio generation.
-    tag_pattern = re.compile(r'(<AI Summary>|<SPEAKER \d+>)', re.IGNORECASE)
+    tag_pattern = re.compile(r'(<(?:AI Summary|SPEAKER[ _]\d+)>)', re.IGNORECASE)
     parts = tag_pattern.split(text)
     chunks = []
     i = 0
     while i < len(parts):
-        if tag_pattern.match(parts[i]):
+        # A non-tag part is always at an even index
+        if parts[i].strip():
+            # Check if there is a corresponding tag part
             if i + 1 < len(parts):
-                chunks.append(parts[i] + parts[i+1])
+                # Combine the tag with the text that follows it
+                chunks.append(parts[i+1] + parts[i])
                 i += 2
             else:
                 chunks.append(parts[i])
                 i += 1
         else:
-            if parts[i].strip():
-                chunks.append(parts[i])
             i += 1
+
+    # If the text starts with a tag, the first part will be empty. The logic needs to handle this.
+    # Let's refine the chunking logic to be more robust.
+    chunks = []
+    # Find all tags and their positions
+    tags_with_indices = [(m.group(0), m.start()) for m in tag_pattern.finditer(text)]
+    last_idx = 0
+    for tag, start_idx in tags_with_indices:
+        # Add the text before the tag
+        if start_idx > last_idx:
+            chunks.append(text[last_idx:start_idx])
+        # The "chunk" is the tag itself, which we'll use for voice assignment later
+        chunks.append(tag)
+        last_idx = start_idx + len(tag)
+    # Add any remaining text after the last tag
+    if last_idx < len(text):
+        chunks.append(text[last_idx:])
+
+    # Now, let's process these chunks to assign voices
+    assigned = []
     tag_voice_map = {}
-    # Gender mapping for voices
     female_voices = [v for v in all_voices if v in {"Tara", "Leah", "Jess", "Mia", "Zoe"} and v != user_voice]
     male_voices = [v for v in all_voices if v in {"Leo", "Dan", "Zac"} and v != user_voice]
-    # Alternate between female and male voices
-    female_idx = 0
-    male_idx = 0
+    female_idx, male_idx = 0, 0
     next_is_female = True
-    assigned = []
-    voice_tag_pattern = re.compile(r'voice:([a-zA-Z0-9_\-]+)', re.IGNORECASE)
+    
+    current_voice = user_voice
+
     for chunk in chunks:
-        tag_match = re.match(r'<(AI Summary|SPEAKER \d+)>', chunk.strip(), re.IGNORECASE)
-        # Check for explicit voice:NAME tag in the chunk text
-        voice_tag_match = voice_tag_pattern.search(chunk)
-        if voice_tag_match:
-            explicit_voice = voice_tag_match.group(1).capitalize()
-            if explicit_voice in all_voices:
-                voice = explicit_voice
-                log(f"Explicit voice tag found: {explicit_voice}")
-            else:
-                voice = user_voice
-            chunk_text = voice_tag_pattern.sub('', chunk)
-        elif tag_match:
-            tag = tag_match.group(0).upper()
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+
+        tag_match = tag_pattern.match(chunk)
+        if tag_match:
+            tag = tag_match.group(0).upper().replace('_', ' ') # Normalize tag
             if tag in tag_voice_map:
-                voice = tag_voice_map[tag]
+                current_voice = tag_voice_map[tag]
             else:
-                # Alternate between female and male voices
                 if female_voices or male_voices:
                     if next_is_female and female_voices:
-                        voice = female_voices[female_idx % len(female_voices)]
+                        new_voice = female_voices[female_idx % len(female_voices)]
                         female_idx += 1
                         next_is_female = False
                     elif male_voices:
-                        voice = male_voices[male_idx % len(male_voices)]
+                        new_voice = male_voices[male_idx % len(male_voices)]
                         male_idx += 1
                         next_is_female = True
                     else:
-                        # Fallback if one gender list is empty
-                        voice = (female_voices + male_voices)[0]
-                    log(f"Assigned voice '{voice}' to tag {tag}")
+                        new_voice = (female_voices + male_voices)[0]
+                    
+                    log(f"Assigned voice '{new_voice}' to tag {tag}")
+                    tag_voice_map[tag] = new_voice
+                    current_voice = new_voice
                 else:
-                    voice = user_voice
-                tag_voice_map[tag] = voice
-            chunk_text = re.sub(r'<(AI Summary|SPEAKER \d+)>', '', chunk, flags=re.IGNORECASE)
-        else:
-            voice = user_voice
-            chunk_text = chunk
-        chunk_text = re.sub(r'<(AI Summary|SPEAKER \d+)>', '', chunk_text, flags=re.IGNORECASE).strip()
-        for sub_chunk in split_long_paragraphs([chunk_text], max_length=max_length):
+                    # No alternate voices available, use user_voice
+                    tag_voice_map[tag] = user_voice
+                    current_voice = user_voice
+            # This chunk is just a tag, so we continue to the next chunk which contains the text
+            continue
+        
+        # This chunk is text, assign the current_voice
+        for sub_chunk in split_long_paragraphs([chunk], max_length=max_length):
             if sub_chunk:
-                assigned.append((sub_chunk, voice))
+                assigned.append((sub_chunk, current_voice))
+
+    # If no tags were found at all, the whole text gets the user_voice
+    if not tags_with_indices:
+        for sub_chunk in split_long_paragraphs([text], max_length=max_length):
+            if sub_chunk:
+                assigned.append((sub_chunk, user_voice))
+                
     log(f"Total assigned chunks: {len(assigned)}")
     return assigned
