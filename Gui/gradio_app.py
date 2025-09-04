@@ -43,7 +43,14 @@ def gradio_process_document(input_file, model_name, prompt_key, voice_name, cust
                 return
         else:
             model_value = next((v for (label, v) in model_options if label == model_name or v == model_name), model_name)
-        voice_value = next((name for (name, desc) in voice_options if name == voice_name), voice_name)
+        # Validate voice selection
+        available_voice_names = [name for (name, desc) in voice_options]
+        if voice_name not in available_voice_names:
+            warning = f"[Warning] Voice '{voice_name}' is not available. Defaulting to '{available_voice_names[0]}'."
+            logs_persistent = f"{warning}\n{logs_persistent}" if logs_persistent else warning
+            voice_value = available_voice_names[0]
+        else:
+            voice_value = voice_name
         prompt_text = custom_prompt_text.strip() if custom_prompt_text else ""
         llm_progress_val = 0
         tts_progress_val = 0

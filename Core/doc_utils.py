@@ -1,4 +1,4 @@
-# doc_utils.py - Unified Document Utilities for LegalTTSV2 (Gradio Edition)
+# doc_utils.py - Unified Document Utilities for LegalTTSV2
 # Provides all document-related utilities: DOCX extraction, chunking, file normalization,
 # RTF/PDF conversion, and preprocessing. All logic is GUI-agnostic and logging is consistent.
 
@@ -66,8 +66,8 @@ def normalize_path(path):
 def convert_rtf_to_docx(rtf_path):
     # Convert an RTF file to DOCX using pypandoc. Returns the path to the new DOCX file.
     if not pypandoc:
-        log("pypandoc is required for RTF to DOCX conversion. Install with 'pip install pypandoc'.")
-        raise ImportError("pypandoc is required for RTF to DOCX conversion. Install with 'pip install pypandoc'.")
+        log("pypandoc is required for RTF to DOCX conversion.'.")
+        raise ImportError("pypandoc is required for RTF to DOCX conversion.'.")
     docx_path = os.path.splitext(rtf_path)[0] + ".docx"
     pypandoc.convert_file(rtf_path, 'docx', outputfile=docx_path)
     if not os.path.exists(docx_path):
@@ -102,8 +102,6 @@ def convert_to_docx(input_path):
         log(f"Unsupported file type for conversion: {input_path} (extension: '{ext}')")
         raise ValueError(f"Unsupported file type for conversion: {input_path} (extension: '{ext}')")
 
-
-# PDF to DOCX and preprocessing utilities
 
 def pdf_to_docx(pdf_path: str, docx_path: str) -> None:
     # Convert a PDF file to a Word (.docx) file using Microsoft Word automation (if available),
@@ -174,3 +172,33 @@ def process_pdf(pdf_path: str, temp_dir=None) -> str:
     preprocess_docx(docx_path)
     log(f"Processed PDF to DOCX: {docx_path}")
     return docx_path
+def docx_to_txt(docx_path, txt_path=None):
+    # Convert a DOCX file to plain TXT (one paragraph per line).
+    doc = Document(docx_path)
+    lines = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+    txt_content = '\n'.join(lines)
+    if txt_path:
+        with open(txt_path, 'w', encoding='utf-8') as f:
+            f.write(txt_content)
+        log(f"Converted DOCX to TXT: {txt_path}")
+        return txt_path
+    return txt_content
+
+def rtf_to_txt(rtf_path, txt_path=None):
+    # Convert RTF to DOCX, then to TXT.
+    docx_path = convert_rtf_to_docx(rtf_path)
+    return docx_to_txt(docx_path, txt_path)
+
+def ensure_ollama_text(input_path):
+    # For Ollama: if TXT, read and return text. If PDF/RTF, convert to DOCX, extract text. If DOCX, extract text.
+    ext = os.path.splitext(input_path)[1].strip().lower()
+    if ext == '.txt':
+        with open(input_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    elif ext == '.docx':
+        return extract_text_from_docx(input_path)
+    elif ext == '.rtf' or ext == '.pdf':
+        docx_path = convert_to_docx(input_path)
+        return extract_text_from_docx(docx_path)
+    else:
+        raise ValueError(f"Unsupported file type for Ollama: {input_path} (extension: '{ext}')")

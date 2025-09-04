@@ -14,7 +14,7 @@ def main():
     try:
         from Gui import gradio_app
         log("Launching Gradio app...")
-        gradio_app.launch()
+        gradio_app.demo.launch()
     except Exception as e:
         log(f"Failed to launch Gradio app: {e}")
         raise

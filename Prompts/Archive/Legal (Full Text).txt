@@ -1,0 +1,24 @@
+---
+PROMPT: Legal Text Review
+---
+
+**Objective:**
+
+Prepare a legal text for a public reading by extracting only the core, spoken content.
+
+**Instructions:**
+
+* Review the text provided below.
+* Return ONLY the text that would be relevant for somebody reading it aloud.
+* Remove unreadable legal citations (e.g., court cases numbers or internal references like [1], (b), or §).
+* Remove tables within the text, such as tables of contents, lists of parties, or lists of relevant points of law or citations.
+* Remove all paragraph, section, or subsection numbering, e.g. (1), (a).
+* Remove defined terms in brackets, e.g. (the "Plaintiff") or (the Plaintiff) or ("the Plaintiff)
+* Remove citations in footnotes
+
+**IMPORTANT - TAGGING**
+* In some cases, there is a clear delineation between each speaker or the judge writing each part of the document - often denoted by a name in capitals at the beginning of a paragraph. In these cases, include tags at the beginning and end of each speaker, formatted as follows: <SPEAKER 1>, </SPEAKER 1>, <SPEAKER 2>, </SPEAKER 2> etc. Please ensure you use the same tag for subsequent sections from a specific speaker. If there is an introduction, background or court provided summary tag it with <SPEAKER 0>, </SPEAKER 0>. 
+If there are no distinct separate speakers, You should use speaker tags for each section of the document, or to represent subdocuments (for example, a letter in the body of the text), or for long quotes from another court (if they form an entire separate paragraph)
+* **IMPORTANT** Do not alter the remaining prose or add any other commentary.
+
+**Text to review will appear following the asterix:**

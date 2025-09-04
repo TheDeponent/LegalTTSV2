@@ -14,7 +14,7 @@ LegalTTSV2 is a modular, Gradio web-based pipeline for converting legal document
 
 ## Architecture
 - **Entry Point:** `main.py` launches the Gradio web UI (`gradio_app.py`).
-- **Core Logic:** All business logic is in `Core/` (TTS, LLM, chunking, deduplication, etc).
+- **Core Logic:** All business logic is in `Core/` (TTS, LLM, chunking, audio deduplication, etc).
 - **Web UI Logic:** In `gradio_app.py` and `Gui/app.py`.
 - **Prompts:** Stored in `Prompts/`, selectable/customizable via web UI.
 - **File Handling:** Inputs in `Inputs/`, outputs in `Outputs/`, logs in `logs/`, text outputs in `Text Outputs/`.
@@ -57,7 +57,7 @@ LegalTTSV2 is a modular, Gradio web-based pipeline for converting legal document
    - Process and export audio.
 
 ## Developer Notes
-- **Add a new LLM for easy selection:** Implement a handler in `Core/llm_handler.py` and update web UI model options.
+- **Add a new LLM for easy selection:** Implement a handler in `Core/llm_handler.py` and update web UI model options, or use 'custom' type and add in the name of an Ollama supported llm.
 - **Add a new prompt easy selection:** Place a `.txt` file in `Prompts/` and select the prompt when running the app.
 - **Audio deduplication:** Always runs after audio concatenation (`audio_deduplication.py`) to reduce repitition errors made during TTS conversion.
 - **Document conversion:** Uses `win32com` for DOCX/PDF (Windows only), `pypandoc` for RTF to DOCX.

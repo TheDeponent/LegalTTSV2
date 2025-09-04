@@ -9,18 +9,17 @@
 
 import os
 import re
-import time
 from pydub import AudioSegment
 from dotenv import load_dotenv
 from Core.llm_handler import get_llm_response
 from Core.tts_handler import generate_speech
-from Core.doc_utils import extract_text_from_docx, convert_to_docx, split_long_paragraphs
+from Core.doc_utils import extract_text_from_docx, convert_to_docx, split_long_paragraphs, ensure_ollama_text
 from Core.constants import MAX_CHUNK_LENGTH
 from Core.prompt_handler import get_system_prompt
 from Core.voice_assignment import assign_voices_to_chunks
 from Core.audio_deduplication import auto_cleaned_filename, clean_audio_with_stt
 from Core.audio_utils import concatenate_and_cleanup_audio
-from Core.gemini_handler import process_gemini_file_workflow
+from Core.gemini_handler import process_gemini_request
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -91,93 +90,118 @@ def process_document_backend(
 
     if is_custom_text:
         # Custom text input: skip all file conversion and extraction logic
-        # For Gemini, send prompt as system_prompt and user text as input
+        yield "Processing custom text input..."
         if model_name in ["gemini-2.5-pro", "gemini-2.5-flash"]:
-            from Core.gemini_handler import get_gemini_response
-            yield f"[Gemini] System prompt being sent: {repr(system_prompt)}"
-            yield f"[Gemini] User text being sent: {repr(custom_text)}"
-            yield "Sending custom text (with prompt) directly to Gemini API..."
-            if llm_progress_cb:
-                llm_progress_cb(10)
-            elif progress:
-                progress(10, desc="LLM: Sending custom text to Gemini API...")
-            # Patch: set a log callback so Gemini API output goes to Gradio log
-            gemini_logs = []
-            def gemini_log(msg):
-                gemini_logs.append(f"Gemini: {msg}")
-            get_gemini_response.log_callback = gemini_log
-            llm_response = get_gemini_response(custom_text, model_name, system_prompt, GOOGLE_API_KEY)
-            get_gemini_response.log_callback = None
-            for log_msg in gemini_logs:
-                yield log_msg
-            if not llm_response:
-                yield "Gemini API returned no response for custom text."
-                return
-            yield f"[Gemini LLM Response]\n{llm_response.strip()}"
+            # Use the unified Gemini request handler for text
+            gemini_gen = process_gemini_request(
+                input_path=None,
+                input_text=custom_text,
+                model_name=model_name,
+                system_prompt=system_prompt,
+                voice_name=voice_name,
+                all_voices=[v[0] for v in voice_options],
+                max_length=MAX_CHUNK_LENGTH
+            )
+            for result in gemini_gen:
+                if isinstance(result, str):
+                    yield f"[Gemini Debug] {result}"
+                elif isinstance(result, tuple) and len(result) == 2:
+                    chunks_and_voices, llm_response = result
         else:
             # For Ollama or other models, use get_llm_response generator
-            yield "Sending custom text to LLM..."
+            yield "Sending custom text to Ollama..."
             combined_input = f"{system_prompt}\n\n{custom_text}" if system_prompt else custom_text
-            def _llm_progress(val):
-                if llm_progress_cb:
-                    llm_progress_cb(val)
-                elif progress:
-                    progress(val, desc=f"LLM: Processing ({val}%)")
+            llm_response_gen = get_llm_response(model_name, system_prompt, custom_text)
             llm_response = ""
-            for chunk in get_llm_response(model_name, None, combined_input, progress_callback=_llm_progress):
+            for chunk in llm_response_gen:
                 if isinstance(chunk, str) and not chunk.startswith("LLM Logs:"):
                     llm_response += chunk
             if not llm_response:
                 yield "LLM processing failed."
                 return
             yield f"[LLM Response]\n{llm_response.strip()}"
-        all_voices = [v[0] for v in voice_options]
-        chunks_and_voices = assign_voices_to_chunks(llm_response, voice_name, all_voices, max_length=MAX_CHUNK_LENGTH)
+            all_voices = [v[0] for v in voice_options]
+            chunks_and_voices = assign_voices_to_chunks(llm_response, voice_name, all_voices, max_length=MAX_CHUNK_LENGTH)
+
         if llm_progress_cb:
             llm_progress_cb(100)
         elif progress:
             progress(100, desc="LLM: Complete.")
         yield f"LLM processing complete. {len(chunks_and_voices)} chunks ready for TTS."
 
-    else:
-        # Only run file-based logic if not in custom text mode
-        try:
-            docx_path = convert_to_docx(input_file_path)
-            if docx_path != input_file_path:
-                yield f"Converted to: {docx_path}"
-        except ValueError as ve:
-            yield (f"Invalid file type. Only PDF, DOCX, RTF, and TXT files are allowed.\nDetails: {ve}")
-            return
-        except Exception as e:
-            yield f"File conversion failed: {e}"
-            return
+        # Save LLM response from custom text to a log file
+        if is_custom_text:
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            orig_base = f"custom_input_{timestamp}"
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs"))
+            os.makedirs(logs_dir, exist_ok=True)
+            text_output_path = os.path.join(logs_dir, f"{orig_base}_LLMLOG.txt")
+            if llm_response:
+                try:
+                    with open(text_output_path, "w", encoding="utf-8") as f:
+                        f.write(llm_response)
+                    yield f"LLM response for custom text saved to: {text_output_path}"
+                except Exception as e:
+                    yield f"Failed to save LLM response for custom text: {e}"
 
-        # --- Unified LLM/Chunking logic for all models ---
+    else:
+        # Unified file handling for Gemini and Ollama
         all_voices = [v[0] for v in voice_options]
         chunks_and_voices = []
         llm_response = None
-        if model_name == "no_model":
-            yield "No LLM model selected, skipping LLM step."
-            if llm_progress_cb:
-                llm_progress_cb(100)
-            elif progress:
-                progress(100, desc="LLM: No model selected, skipping.")
-        elif model_name in ["gemini-2.5-pro", "gemini-2.5-flash"]:
-            yield "Sending document to Gemini API..."
+        ext = os.path.splitext(input_file_path)[1].strip().lower()
+        file_size = os.path.getsize(input_file_path)
+        if model_name in ["gemini-2.5-pro", "gemini-2.5-flash"]:
+            # Enforce Gemini file type and size limits
+            if ext not in [".pdf", ".txt", ".docx", ".rtf"]:
+                yield f"Gemini only accepts PDF, TXT, DOCX, or RTF. File type: {ext}"
+                return
+            yield f"Sending document to Gemini API as: {os.path.basename(input_file_path)}..."
             if llm_progress_cb:
                 llm_progress_cb(10)
             elif progress:
                 progress(10, desc="LLM: Sending to Gemini API...")
-            chunks_and_voices, llm_response, gemini_debug_logs = process_gemini_file_workflow(
-                docx_path,
+            # Collect Gemini logs and results
+            chunks_and_voices = None
+            llm_response = None
+            orig_base = os.path.splitext(os.path.basename(input_file_path))[0]
+            logs_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs"))
+            os.makedirs(logs_dir, exist_ok=True)
+            text_output_path = os.path.join(logs_dir, f"{orig_base}_LLMLOG.txt")
+            gemini_logs = []
+            for result in process_gemini_request(
+                input_file_path,
+                None,
                 model_name,
                 system_prompt,
                 voice_name,
                 all_voices,
                 max_length=MAX_CHUNK_LENGTH
-            )
-            for dbg in gemini_debug_logs:
-                yield dbg
+            ):
+                if isinstance(result, str):
+                    gemini_logs.append(result)
+                    yield f"[Gemini Debug] {result}"
+                elif isinstance(result, tuple) and len(result) == 2:
+                    chunks_and_voices, llm_response = result
+            # If Gemini failed, still create a log file with error info
+            if not chunks_and_voices or not llm_response:
+                try:
+                    with open(text_output_path, "w", encoding="utf-8") as f:
+                        f.write("[Gemini workflow failed: No response returned]")
+                    yield f"Gemini workflow failed: No response returned."
+                    yield f"[Gemini Log File] {text_output_path}"
+                except Exception as e:
+                    yield f"Failed to log Gemini API response: {e}"
+                return
+            try:
+                with open(text_output_path, "w", encoding="utf-8") as f:
+                    f.write(llm_response if llm_response else "[No Gemini API response received]")
+                yield f"Gemini API response logged to: {text_output_path}"
+                yield f"[Gemini Log File] {text_output_path}"
+            except Exception as e:
+                yield f"Failed to log Gemini API response: {e}"
+            if llm_response and llm_response.strip():
+                yield f"[Gemini LLM Response]\n{llm_response.strip()}"
             if llm_progress_cb:
                 llm_progress_cb(100)
             elif progress:
@@ -185,7 +209,6 @@ def process_document_backend(
             if not chunks_and_voices:
                 if llm_response and llm_response.strip():
                     yield "Gemini LLM response could not be chunked for TTS. Check prompt or input formatting."
-                    yield f"Gemini LLM response (truncated): {llm_response[:500]}..."
                 else:
                     yield "Gemini processing failed or returned no response."
                 return
@@ -194,8 +217,16 @@ def process_document_backend(
                 return
             yield f"Gemini LLM processing complete. {len(chunks_and_voices)} chunks ready for TTS."
         else:
-            doc_text = extract_text_from_docx(docx_path)
-            yield "Extracted text from DOCX. Running LLM..."
+            # Ollama: process TXT directly, convert/extract for others
+            try:
+                doc_text = ensure_ollama_text(input_file_path)
+            except ValueError as ve:
+                yield (f"Invalid file type. Only PDF, DOCX, RTF, and TXT files are allowed.\nDetails: {ve}")
+                return
+            except Exception as e:
+                yield f"File conversion failed: {e}"
+                return
+            yield "Extracted and cleaned text. Running LLM..."
             def _llm_progress(val):
                 if llm_progress_cb:
                     llm_progress_cb(val)

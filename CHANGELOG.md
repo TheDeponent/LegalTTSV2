@@ -23,6 +23,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Leverage jade/fedleg/vicleg APIs to generate audio summaries of new rulings as audio 'legal news' segments
 - Utilise/improve regex doc handling to ensure quality outcomes from low-end local MLMs.
 
+## [1.3.3] - 2025-09-04
+### Fixed
+- Critical Gemini Workflow Bug: Corrected multiple instances where the Gemini request handler (process_gemini_request) would prematurely return instead of yield, breaking the generator-based workflow. This fix restores functionality for all Gemini-based processing.
+- Custom Text Input Logging: LLM responses generated from custom text inputs are now correctly saved to a custom_input_[timestamp]_LLMLOG.txt file. Previously, these responses were not being logged to a file.
+- Gradio Debug Log Formatting: Fixed a bug that caused debug messages from the Gemini handler to be displayed one character at a time in the Gradio logs. Logs are now readable and correctly formatted.
+
+### Changed
+- Unified Gemini Request Handling: Refactored the backend logic in app.py to use a single, unified function (process_gemini_request) for handling both file-based and custom text inputs for Gemini models. This removes redundant code and ensures consistent behavior and logging for all Gemini interactions.
+- Simplified Gemini File Conversion: Removed the unnecessary file conversion step that converted all inputs to a different format for Gemini. The pipeline now sends the original, supported file types (PDF, DOCX, etc.) directly to the Gemini API, simplifying the workflow.
+
 ## [1.3.2] - 2025-09-03
 ### Fixed
 - Country user constant now returns the full country name (e.g., "Australia" instead of "AU").

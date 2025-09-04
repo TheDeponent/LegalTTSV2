@@ -19,6 +19,8 @@ try:
 except ImportError:
 	tzlocal = None
 from Core.country_codes import COUNTRY_CODES
+
+MAX_CHUNK_LENGTH = 750
 	
 def get_state():
 	try:
@@ -29,9 +31,6 @@ def get_state():
 	except Exception:
 		return "Unknown"
 
-MAX_CHUNK_LENGTH = 750
-
-# User-editable constants for prompt template replacement
 
 def get_git_username():
 	try:
@@ -93,6 +92,7 @@ def get_greeting(username):
 		part = "evening"
 	return f"Good {part} {username}"
 
+# User-editable constants for prompt template replacement
 
 USER_CONSTANTS = {
 	"State": get_state(),
