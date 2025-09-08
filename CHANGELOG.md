@@ -28,13 +28,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Unified Gemini Request Handling: Refactored the backend logic in app.py to use a single, unified function (process_gemini_request) for handling both file-based and custom text inputs for Gemini models. This removes redundant code and ensures consistent behavior and logging for all Gemini interactions.
 - Simplified Gemini File Conversion: Removed the unnecessary file conversion step that converted all inputs to a different format for Gemini. The pipeline now sends the original, supported file types (PDF, DOCX, etc.) directly to the Gemini API, simplifying the workflow.
 
-## [1.3.6] - 2025-09-09
-### Changed
-- Overhauled prompts to fix speaker selection and flow of text for smoother audio processing
-
-## [1.3.5] - 2025-09-04
+## [1.3.5] - 2025-09-09
 ### Fixed
 - Further issues with Gemini API/Docx conversion fixed
+
+### Changed
+- Overhauled prompts to fix speaker selection and flow of text for smoother audio processing
 
 ## [1.3.4] - 2025-09-04
 ### Fixed
