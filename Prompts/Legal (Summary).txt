@@ -18,10 +18,10 @@ SCRIPT SECTIONS:
 First, state the full name of the case and identify the main parties involved.
 Then, clearly explain the final outcome of the case. If there were multiple judgments, state which judges were in the majority and which dissented.
 Finally, if the case set a new legal precedent, explain what that precedent is and what its potential future impact might be.
-</SPEAKER 1>
+<SPEAKER 1>
 
 <SPEAKER 2>
 For each judge who wrote a judgment, state their name followed by a concise summary of their reasoning.
 Within this summary, explain the key legal principles, legislation, or precedents that the court's decision was based on.
-</SPEAKER 2>
+<SPEAKER 2>
 

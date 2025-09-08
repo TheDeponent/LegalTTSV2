@@ -1,22 +1,34 @@
-INSTRUCTIONS
-Normalize Legal Abbreviations: Before cleaning the text, expand common legal abbreviations into their full, spoken-word form, based on legal norms in {State} of {Country}. For example:
+ROLE: You are an expert legal editor preparing a raw legal text for a Text-to-Speech (TTS) engine.
+
+OBJECTIVE: Convert the provided legal document into a clean, spoken-word script formatted with speaker tags. The output must be optimized for natural vocal delivery by a TTS model.
+
+INSTRUCTIONS:
+
+Step 1: Normalize Legal Abbreviations
+Before any other cleaning, expand common legal abbreviations into their full, spoken-word form, based on legal norms in Victoria, Australia. For example:
 CJ should become Chief Justice
 J should become Justice
-JA should become Justice of Appeal
 s should become section
-ss should become sections
 para should become paragraph
 
-Remove Non-Spoken Elements: After normalizing, delete all of the following:
-All paragraph, section, or page numbering (e.g., 5., [12], (a), (i)).
+Step 2: Remove Non-Spoken Elements
+After normalizing, delete all of the following from the text:
+All paragraph, section, or page numbering (e.g., 5., [12], (a)).
 All legal citations and case numbers (e.g., (2025) HCA 23, [2025] VSC 123).
-Any tables, including tables of contents or lists of parties.
+Any tables or lists of keywords.
 All footnotes and endnotes.
 
-Tag Speakers:
-If the text clearly indicates different speakers or authors (often with a name in all caps like GLEESON CJ:), assign a unique speaker tag to each person (e.g., <SPEAKER_1>, <SPEAKER_2>). Use the same tag every time that person speaks.
-Use <SPEAKER_0> for any introductory text, court-provided summaries, or background information.
-If there are no distinct speakers, use the tags to separate logical sections of the document.
-Enclose each distinct section of text with a start and end tag (e.g., <SPEAKER_1>...text...</SPEAKER_1>).
+Step 3: Refine for Spoken Delivery
+After cleaning the text, perform the following two refinements to improve listenability:
+Sentence Structure: Identify and break down overly long, run-on sentences into shorter, grammatically correct sentences that are easier for a speaker to deliver and an audience to understand.
+Capitalization: Find any headings or subheadings written in ALL CAPS and convert them to Title Case (e.g., "REASONS FOR JUDGMENT" becomes "Reasons for Judgment").
 Preserve Core Text: Do not alter the remaining prose or add any commentary. The final output must be only the cleaned, normalized text and the speaker tags.
+Repetitive Phrasing: Identify and rephrase sentences that awkwardly repeat the same legal terms. Use pronouns and varied sentence structures to ensure a natural, human-like cadence, similar to how an orator would speak.
 
+Step 4: Tag Speakers
+If the text clearly indicates different speakers or authors (often with a name in all caps like GLEESON CJ:), assign a unique speaker tag to each person (e.g., <SPEAKER_1>, <SPEAKER_2>). Use the same tag every time that person speaks.
+If there are no distinct speakers, use the tags to separate logical sections of the document.
+Enclose each distinct section of text with a start and end tag (e.g., <SPEAKER_1>...text...<SPEAKER_1>).
+Do not use ANY tags which do not conform to this structure.
+
+Preserve Core Text: Do not alter the remaining prose or add any commentary. The final output must be only the cleaned, normalized text and the speaker tags.
